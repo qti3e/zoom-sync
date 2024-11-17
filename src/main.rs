@@ -24,8 +24,10 @@ async fn main() -> Result<(), String> {
         .map_err(|e| format!("failed to set weather: {e}"))?;
     println!("updated weather {{ current: {temp}, min: {min}, max: {max} }}");
 
+    let gpu = info::GpuTemp::new(None);
+
     keyboard
-        .set_system_info(42, 69, 0.)
+        .set_system_info(42, gpu.get_temp().unwrap_or_default(), 0.)
         .map_err(|e| format!("failed to set system info: {e}"))?;
     println!("updated system info");
 

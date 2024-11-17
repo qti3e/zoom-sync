@@ -16,3 +16,4 @@ hidapi = "2.6.3"
 chrono = "0.4.38"
 ipinfo = "3.0.1"
 open-meteo-api = "0.1.4"
+nvml-wrapper = "0.10.0" # nvidia temp
