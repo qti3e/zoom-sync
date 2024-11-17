@@ -19,11 +19,22 @@ nix run
 cargo run
 ```
 
-## TODO
+## Feature Checklist
 
+- [x] Reverse engineer updating each value
+  - [x] Time
+  - [x] Weather (current, min, max)
+  - [x] CPU/GPU temp
+  - [x] Download rate
+- [x] Fetch current weather report
+- [x] Fetch GPU temp (nvidia only)
+- [ ] Fetch CPU temp
+- [ ] Monitor download rate
+- [ ] CLI options
 - [ ] System tray menu
-- [ ] System daemon
-- [ ] Crates.io release
-- [ ] AUR release
-- [ ] Nixpkgs release
-- [ ] Windows release
+  - [ ] Poll and autodetect new keyboards
+  - [ ] Update intervals for each value
+- [ ] Package release for version 1.0
+  - [ ] Crates.io
+  - [ ] Nixpkgs
+  - [ ] Windows
