@@ -4,7 +4,13 @@ use std::sync::LazyLock;
 
 use nvml_wrapper::{enum_wrappers::device::TemperatureSensor, Device, Nvml};
 
-static NVML: LazyLock<Option<Nvml>> = LazyLock::new(|| Nvml::init().ok());
+static NVML: LazyLock<Option<Nvml>> = LazyLock::new(|| {
+    let nvml = Nvml::init().ok();
+    if nvml.is_none() {
+        eprintln!("warning: nvml not found");
+    }
+    nvml
+});
 
 /// Helper struct to track gpu temperature
 pub struct GpuTemp {
@@ -13,9 +19,14 @@ pub struct GpuTemp {
 
 impl GpuTemp {
     pub fn new(index: Option<u32>) -> Self {
-        let maybe_device = NVML
-            .as_ref()
-            .and_then(|nvml| nvml.device_by_index(index.unwrap_or_default()).ok());
+        let maybe_device = NVML.as_ref().and_then(|nvml| {
+            let device = nvml.device_by_index(index.unwrap_or_default()).ok();
+            if device.is_none() {
+                eprintln!("warning: device not found")
+            }
+            device
+        });
+
         Self { maybe_device }
     }
 
