@@ -4,25 +4,34 @@
     { self, nixpkgs }:
     let
       system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
+      pkgs = import nixpkgs {
+        inherit system;
+
+        config.allowUnfree = true;
+        config.allowBroken = true;
+      };
     in
     {
-
       packages.${system}.default = (
         pkgs.callPackage (
           { lib, rustPlatform }:
           rustPlatform.buildRustPackage {
-            name = "zoom65-sync";
+            name = "zoom-sync";
             src = ./.;
             cargoLock = {
               lockFile = ./Cargo.lock;
             };
-            nativeBuildInputs = with pkgs; [ pkg-config ];
+            nativeBuildInputs = with pkgs; [
+              pkg-config
+              addDriverRunpath
+            ];
             buildInputs = with pkgs; [
               systemd # for libudev
-              openssl
+              openssl # for http request to ipinfo and open-meteo
             ];
-
+            fixupPhase = ''
+              addDriverRunpath $out/bin/zoom-sync
+            '';
           }
         ) { }
       );
