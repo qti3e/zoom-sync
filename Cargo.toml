@@ -13,7 +13,8 @@ strum = { version = "0.26", features = ["derive"] }
 hidapi = "2.6.3"
 
 # data fetching
-chrono = "0.4.38"
-ipinfo = "3.0.1"
-open-meteo-api = "0.1.4"
+chrono = "0.4.38" # local time
+ipinfo = "3.0.1" # geolocation
+open-meteo-api = "0.1.4" # weather
 nvml-wrapper = "0.10.0" # nvidia temp
+sysinfo = "0.32.0" # cpu temp

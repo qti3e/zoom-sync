@@ -3,14 +3,7 @@
 use std::sync::LazyLock;
 
 use nvml_wrapper::{enum_wrappers::device::TemperatureSensor, Device, Nvml};
-
-static NVML: LazyLock<Option<Nvml>> = LazyLock::new(|| {
-    let nvml = Nvml::init().ok();
-    if nvml.is_none() {
-        eprintln!("warning: nvml not found");
-    }
-    nvml
-});
+use sysinfo::{Component, Components};
 
 /// Helper struct to track gpu temperature
 pub struct GpuTemp {
@@ -18,7 +11,16 @@ pub struct GpuTemp {
 }
 
 impl GpuTemp {
+    /// Construct a new gpu tempurature monitor, optionally selecting by device index
     pub fn new(index: Option<u32>) -> Self {
+        static NVML: LazyLock<Option<Nvml>> = LazyLock::new(|| {
+            let nvml = Nvml::init().ok();
+            if nvml.is_none() {
+                eprintln!("warning: nvml not found");
+            }
+            nvml
+        });
+
         let maybe_device = NVML.as_ref().and_then(|nvml| {
             let device = nvml.device_by_index(index.unwrap_or_default()).ok();
             if device.is_none() {
@@ -30,10 +32,48 @@ impl GpuTemp {
         Self { maybe_device }
     }
 
-    pub fn get_temp(&self) -> Option<u8> {
+    // Refresh and poll the current temperature
+    pub fn get_temp(&self, farenheit: bool) -> Option<u8> {
         self.maybe_device
             .as_ref()
             .and_then(|d| d.temperature(TemperatureSensor::Gpu).ok())
-            .map(|v| v as u8)
+            .map(|v| {
+                if farenheit {
+                    (v as f64 * 9. / 5. + 32.) as u8
+                } else {
+                    v as u8
+                }
+            })
+    }
+}
+
+pub struct CpuTemp {
+    maybe_cpu: Option<Component>,
+}
+
+impl CpuTemp {
+    // Create a new cpu temp monitor, optionally selecting the component by a label search string
+    pub fn new(search_label: Option<&str>) -> Self {
+        let comps: Vec<_> = Components::new_with_refreshed_list().into();
+        let maybe_cpu = comps.into_iter().find(|v| {
+            v.label()
+                .contains(search_label.unwrap_or("coretemp Package id"))
+        });
+        if maybe_cpu.is_none() {
+            eprintln!("warning: could not find coretemp package")
+        }
+        Self { maybe_cpu }
+    }
+
+    // Refresh and poll the current temperature
+    pub fn get_temp(&mut self, farenheit: bool) -> Option<u8> {
+        self.maybe_cpu.as_mut().map(|cpu| {
+            cpu.refresh();
+            let mut temp = cpu.temperature();
+            if farenheit {
+                temp = temp * 9. / 5. + 32.;
+            }
+            temp as u8
+        })
     }
 }

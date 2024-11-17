@@ -60,7 +60,7 @@ impl Icon {
 }
 
 /// Get the current weather, using ipinfo for geolocation, and open-meteo for forcasting
-pub async fn get_weather(lat_long: Option<(f32, f32)>) -> (Icon, f32, f32, f32) {
+pub async fn get_weather(lat_long: Option<(f32, f32)>, farenheit: bool) -> (Icon, f32, f32, f32) {
     let (lat, long) = match lat_long {
         Some((lat, long)) => (lat, long),
         None => {
@@ -99,7 +99,7 @@ pub async fn get_weather(lat_long: Option<(f32, f32)>) -> (Icon, f32, f32, f32) 
     let mut temp = current.temperature;
 
     // convert measurements to farenheit
-    if true {
+    if farenheit {
         min = min * 9. / 5. + 32.;
         max = max * 9. / 5. + 32.;
         temp = temp * 9. / 5. + 32.;
