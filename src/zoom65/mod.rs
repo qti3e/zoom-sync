@@ -3,6 +3,8 @@ use std::sync::LazyLock;
 use chrono::{DateTime, Datelike, TimeZone, Timelike};
 use hidapi::{HidApi, HidDevice, HidError};
 
+use crate::weather::Icon;
+
 mod consts;
 
 /// Lazy handle to hidapi
@@ -105,12 +107,12 @@ impl Zoom65v3 {
     /// Update the keyboards current weather report
     pub fn set_weather(
         &mut self,
-        icon: u8,
+        icon: Icon,
         current: u8,
         low: u8,
         high: u8,
     ) -> Result<(), Zoom65Error> {
-        self.update(32, &[icon, current, low, high])
+        self.update(32, &[icon as u8, current, low, high])
     }
 
     /// Update the keyboards current system info
